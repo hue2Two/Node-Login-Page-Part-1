@@ -13,8 +13,8 @@
         <h4>Node MySQL</h4>
         <ul>
             <li><a href="/">Home</a></li>
-            <li><a href="/login">Login</a></li>
-            <li><a href="/register">Register</a></li>
+            <li><a href="/profile">Profile</a></li>
+            <li><a href="/auth/logout">Logout</a></li>
         </ul>
     </nav>
     <div class="container mt-4">
@@ -27,11 +27,12 @@
                 </div>
                 <h5 class="card-title">
                     {{!-- hard code name of user initially --}}
-                    John Doe
+                    {{!-- John Doe --}}
+                    {{user.name}}
                     <p class="card-text">
                         some random text
                     </p>
-                    <a href="#" class="btn btn-primary">john@email.com</a>
+                    <a href="#" class="btn btn-primary">{{user.email}}</a>
                 </h5>
             </div>
             </div> 

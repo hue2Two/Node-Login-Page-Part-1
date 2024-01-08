@@ -1,6 +1,9 @@
 const mysql = require("mysql");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+// const promisify = require('util');
+const { promisify } = require('util');
+
 
 const db = mysql.createConnection({
     host: process.env.DATABASE_HOST,
@@ -99,4 +102,43 @@ exports.login = async (req, res) => {
     catch (error) {
         console.log(`TRY CATCH ERROR: ${error}`)
     }
+}
+
+exports.isLoggedIn = async (req, res, next) => {
+    req.message = "inside middleware"; //so it can move to rendering
+    console.log(`MIDDLEWARE: ${req.message}`);
+
+    console.log(`CHECKING COOKIES: ${JSON.stringify(req.cookies)}`);
+    //if cookies are of name jwt
+    if(req.cookies.jwt) {
+        try {
+            //decode the token & grab id of user
+            //check the cookie & secret pw
+            //decoded gives id of user, pw issued, token experation
+            //check that the id matches in db
+            const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET);
+            console.log(`DECODED: ${JSON.stringify(decoded)}`);
+
+            //check if user exists in db
+            db.query(`SELECT * FROM users WHERE id = ?`, [decoded.id], (error, result) => {
+                console.log(`CHECKING JWT RESULT: ${JSON.stringify(result)}`);
+
+                //if no result
+                if (!result) {
+                    return next();
+                }
+
+                //grab user with correct id [array of results]
+                req.user = result[0];
+                return next(); //code stops and moves on to next
+
+            })
+        } catch (error) {
+            console.log(`COOKIE ERROR: ${error}`);
+            return next();
+        }
+    } else {
+        next();
+    }
+   
 }
